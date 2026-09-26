@@ -30,6 +30,11 @@ class PlainForm(forms.Form):
     subject = forms.CharField()
     contact_email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+    birth_date = forms.DateField()
+    appointment = forms.DateTimeField()
+    start_time = forms.TimeField()
+    settings_blob = forms.JSONField()
+    scheduled_at = forms.SplitDateTimeField()
 
 
 @pytest.mark.django_db
@@ -73,6 +78,27 @@ def test_plain_non_model_form_uses_class_based_heuristic():
     assert "dir" not in form.fields["subject"].widget.attrs
     assert form.fields["contact_email"].widget.attrs["dir"] == "ltr"
     assert form.fields["password"].widget.attrs["dir"] == "ltr"
+
+
+def test_date_time_and_json_fields_default_to_ltr():
+    # DateInput/DateTimeInput/TimeInput all render as <input type="text">
+    # in stock Django, so only the field-class heuristic (not input_type)
+    # catches these.
+    form = PlainForm()
+    assert form.fields["birth_date"].widget.attrs["dir"] == "ltr"
+    assert form.fields["appointment"].widget.attrs["dir"] == "ltr"
+    assert form.fields["start_time"].widget.attrs["dir"] == "ltr"
+    assert form.fields["settings_blob"].widget.attrs["dir"] == "ltr"
+
+
+def test_split_datetime_field_propagates_dir_to_both_subwidgets():
+    # Admin swaps DateTimeField's form field to SplitDateTimeField, a
+    # MultiWidget rendering two separate <input> boxes. Setting dir on the
+    # outer widget attrs must still reach both rendered sub-inputs.
+    form = PlainForm()
+    assert form.fields["scheduled_at"].widget.attrs["dir"] == "ltr"
+    rendered = str(form["scheduled_at"])
+    assert rendered.count('dir="ltr"') == 2
 
 
 def test_admin_login_form_username_and_password_are_ltr():

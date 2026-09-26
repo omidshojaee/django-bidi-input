@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-bidi-input"
-version = "1.0.0"
+version = "1.1.0"
 description = "Force correct text direction (LTR/RTL) on Django admin and form input fields, regardless of site language."
 readme = "README.md"
 license = { text = "MIT" }

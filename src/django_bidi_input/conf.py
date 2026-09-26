@@ -13,6 +13,11 @@ DEFAULT_LTR_FIELD_PATHS = [
     "django.forms.DecimalField",
     "django.forms.DurationField",
     "django.forms.RegexField",
+    "django.forms.JSONField",
+    "django.forms.DateField",
+    "django.forms.DateTimeField",
+    "django.forms.TimeField",
+    "django.forms.SplitDateTimeField",
 ]
 
 DEFAULT_LTR_INPUT_TYPES = {

@@ -55,7 +55,12 @@ For each field, in order (first match wins):
      custom user model uses `USERNAME_FIELD = "email"`.
    - field class is `EmailField`, `URLField`, `SlugField`, `UUIDField`,
      `GenericIPAddressField`, `FilePathField`, `IntegerField`, `FloatField`,
-     `DecimalField`, `DurationField`, `RegexField`.
+     `DecimalField`, `DurationField`, `RegexField`, `JSONField`, `DateField`,
+     `DateTimeField`, `TimeField`, `SplitDateTimeField` (the two-input widget
+     admin uses for `DateTimeField` by default — `dir` propagates to both
+     boxes). Date/time fields need this class-based check specifically
+     because Django's date/time widgets render as `<input type="text">`,
+     not native HTML5 `type="date"`/`type="time"`, even in admin.
 5. Otherwise left alone — inherits the page's direction (correct for plain
    `CharField`/`TextField`).
 

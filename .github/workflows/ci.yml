@@ -12,8 +12,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        django-version: ["5.2"]
+        include:
+          - python-version: "3.10"
+            django-version: "5.2"
+          - python-version: "3.11"
+            django-version: "5.2"
+          - python-version: "3.12"
+            django-version: "5.2"
+          - python-version: "3.12"
+            django-version: "6.0"
+          - python-version: "3.12"
+            django-version: "6.1"
+          - python-version: "3.13"
+            django-version: "5.2"
+          - python-version: "3.13"
+            django-version: "6.1"
+          - python-version: "3.14"
+            django-version: "5.2"
+          - python-version: "3.14"
+            django-version: "6.1"
 
     steps:
       - uses: actions/checkout@v7
@@ -23,8 +40,28 @@ jobs:
 
       - name: Install package and dependencies
         run: |
-          pip install -e ".[test]"
           pip install "django~=${{ matrix.django-version }}.0"
+          pip install -e ".[test]"
 
       - name: Run tests
         run: pytest tests/ -v
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build and check the distribution
+        run: |
+          pip install build twine
+          python -m build
+          twine check dist/*
+      - name: Check the wheel carries the license text
+        run: |
+          python - <<'EOF'
+          import glob, zipfile
+          names = zipfile.ZipFile(glob.glob("dist/*.whl")[0]).namelist()
+          assert any(n.endswith("licenses/LICENSE") for n in names), names
+          EOF

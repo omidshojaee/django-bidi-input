@@ -1,14 +1,7 @@
 from django.core.exceptions import FieldDoesNotExist
 
 from . import conf
-
-LTR = "ltr"
-RTL = "rtl"
-VALID_DIRECTIONS = (LTR, RTL)
-
-
-def _override_key(model, field_name):
-    return "{}.{}.{}".format(model._meta.app_label, model._meta.object_name, field_name)
+from .conf import AUTO, LTR, RTL, VALID_DIRECTIONS  # noqa: F401  (public names)
 
 
 def _model_field_for(model, field_name):
@@ -20,28 +13,39 @@ def _model_field_for(model, field_name):
         return None
 
 
-def resolve_direction(form_field, field_name, model=None):
+def _autocomplete_is_ltr(value, ltr_values):
+    """``autocomplete`` is a list of space separated tokens ("shipping email")."""
+    if not isinstance(value, str):
+        return False
+    return any(token in ltr_values for token in value.lower().split())
+
+
+def resolve_direction(form_field, field_name, model=None, widget=None):
+    """Return ``"ltr"``, ``"rtl"``, ``"auto"`` or ``None`` (leave it alone)."""
+    widget = widget or form_field.widget
+    if widget.is_hidden:
+        return None
+
+    config = conf.get_config()
     model_field = _model_field_for(model, field_name)
 
     if model_field is not None:
-        direction = getattr(model_field, "direction", None)
-        if direction in VALID_DIRECTIONS:
+        direction = conf.normalize_direction(getattr(model_field, "direction", None))
+        if direction:
             return direction
 
     if model is not None:
-        override = conf.get_overrides().get(_override_key(model, field_name))
-        if override in VALID_DIRECTIONS:
-            return override
+        direction = config.overrides.get(f"{model._meta.label_lower}.{field_name}".lower())
+        if direction:
+            return direction
 
-    input_type = getattr(form_field.widget, "input_type", None)
-    if input_type in conf.get_ltr_input_types():
+    if getattr(widget, "input_type", None) in config.input_types:
         return LTR
 
-    autocomplete = form_field.widget.attrs.get("autocomplete")
-    if autocomplete in conf.get_ltr_autocomplete_values():
+    if _autocomplete_is_ltr(widget.attrs.get("autocomplete"), config.autocomplete_values):
         return LTR
 
-    if isinstance(form_field, conf.get_ltr_field_classes()):
+    if isinstance(form_field, config.field_classes):
         return LTR
 
     return None

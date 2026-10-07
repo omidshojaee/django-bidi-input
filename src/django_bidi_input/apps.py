@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.core import checks
 
 
 class BidiInputConfig(AppConfig):
@@ -8,5 +9,7 @@ class BidiInputConfig(AppConfig):
 
     def ready(self):
         from . import patch
+        from .checks import check_settings
 
         patch.install()
+        checks.register(check_settings)

@@ -1,26 +1,29 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-bidi-input"
-version = "1.1.0"
+version = "1.2.0"
 description = "Force correct text direction (LTR/RTL) on Django admin and form input fields, regardless of site language."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Omid Shojaee", email = "omid.shojaee@gmail.com" }]
 requires-python = ">=3.10"
 dependencies = ["Django>=5.2"]
 classifiers = [
     "Framework :: Django",
     "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
@@ -38,3 +41,8 @@ where = ["src"]
 DJANGO_SETTINGS_MODULE = "tests.settings"
 python_files = ["test_*.py"]
 pythonpath = ["."]
+filterwarnings = [
+    # Django 5.2 warns when a model URLField builds its form field; it comes from
+    # the test project's model, not from this package.
+    "ignore:The default scheme will be changed",
+]
